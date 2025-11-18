@@ -29,8 +29,18 @@ const Login = () => {
     const result = await login(formData.email, formData.password);
     
     if (result.success) {
-      console.log('Login successful!');
-      navigate('/');
+      const role = (result.role || localStorage.getItem('role') || 'student').toLowerCase();
+      const roleRouteMap = {
+        admin: '/dashboard/admin',
+        officestaff: '/dashboard/officestaff',
+        facultymanagement: '/dashboard/facultymanagement',
+        student: '/dashboard/student',
+        lecturer: '/dashboard/lecturer',
+        lectureassistant: '/dashboard/lectureassistant',
+        labassistant: '/dashboard/labassistant'
+      };
+      const dest = roleRouteMap[role] || '/dashboard/student';
+      navigate(dest);
     } else {
       setError(result.error);
     }

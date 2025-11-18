@@ -10,18 +10,13 @@ const Register = () => {
     name: '',
     email: '',
     password: '',
-    confirmPassword: '',
-    role: 'student',
-    department_id: '1'
+    role: 'student'
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
+    setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
     setError('');
   };
 
@@ -30,32 +25,10 @@ const Register = () => {
     setLoading(true);
     setError('');
 
-    // Validation
-    if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match');
-      setLoading(false);
-      return;
-    }
-
-    if (formData.password.length < 6) {
-      setError('Password must be at least 6 characters');
-      setLoading(false);
-      return;
-    }
-
-    const userData = {
-      name: formData.name,
-      email: formData.email,
-      password: formData.password,
-      role: formData.role,
-      department_id: parseInt(formData.department_id)
-    };
-
-    const result = await register(userData);
+    const result = await register(formData);
     
     if (result.success) {
-      alert('Registration successful! Please login.');
-      navigate('/login');
+      navigate('/');
     } else {
       setError(result.error);
     }
@@ -67,17 +40,11 @@ const Register = () => {
     <div className="auth-container">
       <div className="auth-card">
         <div className="auth-header">
-          <h1>Faculty of Science </h1>
-          <h1>Resource Management System</h1>
           <h2>Register</h2>
-          <p>Create your account</p>
+          <p>Create a new account</p>
         </div>
 
-        {error && (
-          <div className="alert alert-error">
-            {error}
-          </div>
-        )}
+        {error && <div className="alert alert-error">{error}</div>}
 
         <form onSubmit={handleSubmit} className="auth-form">
           <div className="form-group">
@@ -107,45 +74,6 @@ const Register = () => {
           </div>
 
           <div className="form-group">
-            <label htmlFor="role">Role</label>
-            <select
-              id="role"
-              name="role"
-              value={formData.role}
-              onChange={handleChange}
-              required
-            >
-              <option value="student">Student</option>
-              <option value="lecturer">Lecturer</option>
-              <option value="office_staff">Office Staff</option>
-              <option value="Lab Assistant">Lab Assistant</option>
-              <option value="Lecture Assistant">Lecture Assistant</option>
-              <option value="Faculty Management">Faculty Management</option>
-            </select>
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="department_id">Department</label>
-            <select
-              id="department_id"
-              name="department_id"
-              value={formData.department_id}
-              onChange={handleChange}
-              required
-            >
-              <option value="1">Statistics & Computer Science</option>
-              <option value="2">Chemistry</option>
-              <option value="3">Mathematics</option>
-              <option value="4">Physics</option>
-              <option value="5">Geology</option>
-              <option value="6">Botany</option>
-              <option value="7">Environmental and Industrial Sciences</option>
-              <option value="8">Molecular Biology & Biotechnology</option>
-              <option value="9">Zoology</option>
-            </select>
-          </div>
-
-          <div className="form-group">
             <label htmlFor="password">Password</label>
             <input
               type="password"
@@ -154,36 +82,30 @@ const Register = () => {
               value={formData.password}
               onChange={handleChange}
               required
-              placeholder="Enter password (min 6 characters)"
+              placeholder="Enter your password"
             />
           </div>
 
           <div className="form-group">
-            <label htmlFor="confirmPassword">Confirm Password</label>
-            <input
-              type="password"
-              id="confirmPassword"
-              name="confirmPassword"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              required
-              placeholder="Confirm your password"
-            />
+            <label htmlFor="role">Role</label>
+            <select id="role" name="role" value={formData.role} onChange={handleChange}>
+              <option value="student">Student</option>
+              <option value="lecturer">Lecturer</option>
+              <option value="admin">Admin</option>
+              <option value="officestaff">Office Staff</option>
+              <option value="facultymanagement">Faculty Management</option>
+              <option value="lectureassistant">Lecture Assistant</option>
+              <option value="labassistant">Lab Assistant</option>
+            </select>
           </div>
 
-          <button 
-            type="submit" 
-            className="btn btn-primary btn-block"
-            disabled={loading}
-          >
-            {loading ? 'Creating Account...' : 'Register'}
+          <button type="submit" className="btn btn-primary" disabled={loading}>
+            {loading ? 'Registering...' : 'Register'}
           </button>
         </form>
 
         <div className="auth-footer">
-          <p>
-            Already have an account? <Link to="/login">Login here</Link>
-          </p>
+          <p>Already have an account? <Link to="/">Login here</Link></p>
         </div>
       </div>
     </div>
