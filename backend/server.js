@@ -3,21 +3,34 @@ const cors = require('cors');
 require('dotenv').config();
 
 const app = express();
+
+// Enable CORS
 app.use(cors());
+
+// Body parser
 app.use(express.json());
 
-const authRouter = require('./routes/auth'); // ensure path correct
+// Serve uploaded files
+app.use('/uploads', express.static('uploads'));
+
+// Routes
+const authRouter = require('./routes/auth');
 app.use('/api/auth', authRouter);
 
-// simple 404 for API
-app.use('/api/*', (req, res) => res.status(404).json({ message: 'API route not found' }));
-
-// error handler
+// Error handler
 app.use((err, req, res, next) => {
-  console.error('Unhandled server error:', err);
+  console.error('Server error:', err);
   res.status(500).json({ message: 'Server error' });
 });
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on ${PORT}`));
+app.listen(PORT, () => {
+  console.log(`Server running on ${PORT}`);
+  console.log('Attempting to connect to database:', { 
+    host: process.env.DB_HOST, 
+    user: process.env.DB_USER, 
+    database: process.env.DB_NAME 
+  });
+});
+
 module.exports = app;

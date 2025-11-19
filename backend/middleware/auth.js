@@ -1,5 +1,8 @@
 const jwt = require('jsonwebtoken');
-const db = require('../config/database');
+require('dotenv').config();
+const express = require('express');
+const router = express.Router();
+const authMiddleware = require('../middleware/auth');
 
 // Authentication middleware
 const auth = async (req, res, next) => {
@@ -20,26 +23,10 @@ const auth = async (req, res, next) => {
     // Verify token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     
-    // Get user from database to ensure they still exist
-    const [users] = await db.query(
-      'SELECT user_id, name, email, role, department_id FROM users WHERE user_id = ?',
-      [decoded.userId]
-    );
-
-    if (users.length === 0) {
-      return res.status(401).json({ 
-        message: 'Token is not valid. User not found.',
-        requiresLogin: true 
-      });
-    }
-
     // Add user info to request object
     req.user = {
-      userId: users[0].user_id,
-      name: users[0].name,
-      email: users[0].email,
-      role: users[0].role,
-      departmentId: users[0].department_id
+      id: decoded.userId,
+      role: decoded.role
     };
 
     console.log(`🔐 User authenticated: ${req.user.name} (${req.user.role})`);
@@ -83,4 +70,19 @@ const authorize = (roles) => {
   };
 };
 
-module.exports = { auth, authorize };
+// Sample route
+router.get('/me', auth, async (req, res) => {
+  try {
+    // Respond with user info
+    res.json({ 
+      id: req.user.id, 
+      role: req.user.role,
+      message: 'User information retrieved successfully.' 
+    });
+  } catch (error) {
+    console.error('Error retrieving user info:', error.message);
+    res.status(500).json({ message: 'Server error while retrieving user info.' });
+  }
+});
+
+module.exports = { auth, authorize, router };
